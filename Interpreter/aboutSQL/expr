@@ -29,7 +29,7 @@ comparison_operator: = , >= , > , <= , < , <> , !=
 predicate:
     bit_expr [NOT] IN (subquery)
   | bit_expr [NOT] IN (expr [, expr] ...)
-  | bit_expr [NOT] REGEXP bit_expr
+  | bit_expr [NOT] BETWEEN bit_expr AND predicate
   | bit_expr
 
 bit_expr:
@@ -81,11 +81,10 @@ table_references:
     table_reference [, table_reference] ...
 
 table_reference:
-    table_factor
-  | table_reference [INNER | CROSS] JOIN table_factor [join_condition]
+    table_reference [INNER | CROSS] JOIN table_factor [join_condition]
   | table_reference {LEFT|RIGHT} [OUTER] JOIN table_reference join_condition
   | table_reference NATURAL [{LEFT|RIGHT} [OUTER]] JOIN table_factor
-
+  | table_factor
 table_factor:
     tbl_name [[AS] alias]
   | table_subquery AS alias

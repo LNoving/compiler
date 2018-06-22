@@ -1,33 +1,5 @@
-#include "llvm/ADT/APFloat.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
-#include "llvm/IR/Verifier.h"
-#include <algorithm>
-#include <cctype>
-#include <cstdio>
-#include <cstdlib>
-#include<exception>
-#include <map>
-#include <memory>
-#include <string>
-#include <vector>
-#include<exception>
-#include"llvmsql.h"
-#include"catalog.h"
-using namespace llvm;
+#include"..\catalog\catalog.h"
 
-/// SQL begin
-
-
-
-/// SQL end
 token currtoken;
 int delimiter = semicolon_mark;
 
@@ -68,7 +40,9 @@ std::shared_ptr<ExprAST> ParseExprAST()
 		(currtoken.token_value.symbol_mark == and_mark ||
 			currtoken.token_value.symbol_mark == andand_mark ||
 			currtoken.token_value.symbol_mark == or_mark ||
-			currtoken.token_value.symbol_mark == oror_mark)
+			currtoken.token_value.symbol_mark == oror_mark||
+			currtoken.token_value.symbol_mark==tok_AND||
+			currtoken.token_value.symbol_mark==tok_OR)
 		)
 	{
 		op = currtoken.token_value.symbol_mark;
@@ -1004,7 +978,7 @@ std::shared_ptr<CreateTableSimpleAST> ParseCreateTableSimpleAST()
 std::shared_ptr<SelectAST> ParseSelectAST()
 {
 	auto subq = ParseSubqueryAST();
-	consumeit({ delimiter }, "expect delimiter \n");
+	//consumeit({ delimiter }, "expect delimiter \n");
 	return std::make_shared<SelectAST>(std::move(subq));
 }
 
@@ -1036,6 +1010,11 @@ std::shared_ptr<StatementAST> ParseStatementAST()
 		else if (currtoken.token_value.symbol_mark == tok_CREATE)
 		{
 			create = ParseCreateAST();
+			if (create->ctable)
+			{
+				auto tb_cata = create->ctable->simplecreate;
+				make_cata(tb_cata);
+			}
 		}
 		else if (currtoken.token_value.symbol_mark == tok_DROP)
 		{
@@ -1188,6 +1167,7 @@ std::shared_ptr<InsertAST> ParseInsertAST()
 		consumeit({ comma_mark }, "expect ',' \n");
 		value_list.push_back(ParseExprAST());
 	}
+	consumeit({ right_bracket_mark }, "expect ')' \n");
 	return std::make_shared<InsertAST>(std::move(table_name), std::move(col_names), std::move(value_list));
 }
 
@@ -1200,7 +1180,7 @@ std::shared_ptr<DeleteAST> ParseDeleteAST()
 	table_name = ParseIdAST();
 	if (currtoken.token_kind == symbol&&currtoken.token_value.symbol_mark == tok_WHERE)
 	{
-		consumeit({ tok_FROM }, "expect WHERE\n");
+		consumeit({ tok_WHERE }, "expect WHERE\n");
 		where_condition = ParseExprAST();
 	}
 	return std::make_shared<DeleteAST>(std::move(table_name), std::move(where_condition));
@@ -1238,10 +1218,27 @@ std::shared_ptr<SimpleExprAST> and_SE(std::shared_ptr<SimpleExprAST> lhs, std::s
 std::shared_ptr<SimpleExprAST> or_SE(std::shared_ptr<SimpleExprAST> lhs, std::shared_ptr<SimpleExprAST> rhs);
 
 
+/*
+std::shared_ptr<SimpleExprAST> SimpleExprAST::traitValue()
+{
+	if (id) return id->traitValue();
+	if (call) return call->traitValue();
+	if (tablecol) return tablecol->traitValue();
+	//if(expr)return expr->
+	//if(sub)return sub->
+	//if(exists)return exists->
+	if (lit) return lit->traitValue();
+	return nullptr;
+}
 
-
-
-
+std::shared_ptr<SimpleExprAST> LiteralAST::traitValue()
+{
+	if (intvalue) return intvalue->traitValue();
+	if (doublevalue) return doublevalue->traitValue();
+	if (stringvalue) return stringvalue->traitValue();
+	return nullptr;
+}
+*/
 
 std::shared_ptr<SimpleExprAST> aux_binary_op(std::shared_ptr<SimpleExprAST>, std::shared_ptr<SimpleExprAST>)
 {

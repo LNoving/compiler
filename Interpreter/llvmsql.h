@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 #include<exception>
+#include<fstream>
+#include"..\env\envir.h"
 #define LL_LRLen 6
 using std::shared_ptr;
 
@@ -409,8 +411,8 @@ enum reserved_token_value
 	tok_MULTIPOLYGON = -339,
 	tok_MUTEX = -340,
 	tok_MYSQL_ERRNO = -341,
-	tok_NAME = -342,
-	tok_NAMES = -343,
+	//tok_NAME = -342,
+	//tok_NAMES = -343,
 	tok_NATIONAL = -344,
 	tok_NATURAL = -345,
 	tok_NCHAR = -346,
@@ -790,9 +792,9 @@ class eof_value :public value
 
 struct val
 {
-	std::string string_literal; // ' ""
-	int int_literal = 0;    // 先判断是否是 int
-	double double_literal = 0.; // 后判断是否是 double
+	std::string string_literal; 
+	int int_literal = 0; 
+	double double_literal = 0.;
 	int symbol_mark = 0;
 	std::string IdentifierStr;
 	char ch = ' ';
@@ -902,7 +904,7 @@ class unicAST;
 class ForeignAST;
 class SetAST;
 
-
+void init_cata();
 
 std::shared_ptr<ExprAST> ParseExprAST();
 std::shared_ptr<ExpAST> ParseExpAST();
@@ -1101,19 +1103,11 @@ public:
 	SimpleExprAST(std::shared_ptr<SubqueryAST> sub) :sub(std::move(sub)) {}
 	SimpleExprAST(std::shared_ptr<ExistsSubqueryAST> exists) :exists(std::move(exists)) {}
 	SimpleExprAST(std::shared_ptr<LiteralAST> lit) :lit(std::move(lit)) {}
-	std::shared_ptr<SimpleExprAST> traitValue()
-	{
-		if (id) return id->traitValue();
-		if (call) return call->traitValue();
-		if (tablecol) return tablecol->traitValue();
-		//if(expr)return expr->
-		//if(sub)return sub->
-		//if(exists)return exists->
-		if (lit) return lit->traitValue();
-		return nullptr;
-	}
-
+	std::shared_ptr<SimpleExprAST> traitValue();
 };
+
+
+
 
 class IdAST final
 {
@@ -1125,7 +1119,6 @@ public:
 		std::shared_ptr<IdAST> idast = std::make_shared<IdAST>(id);
 		return std::make_shared<SimpleExprAST>(std::move(idast));
 	}
-
 };
 
 class TablecolAST
@@ -1149,11 +1142,13 @@ public:
 	std::vector<std::shared_ptr<ExprAST>> args;
 	CallAST(std::shared_ptr<IdAST> callee, std::vector<std::shared_ptr<ExprAST>> args)
 		: callee(std::move(callee)), args(std::move(args)) {}
+	/*
 	std::shared_ptr<SimpleExprAST> traitValue()
 	{
 		std::shared_ptr<IdAST> cc = std::make_shared<IdAST>(callee,args);	
 		return std::make_shared<SimpleExprAST>(std::move(cc));
 	}
+	*/
 };
 
 class LiteralAST
@@ -1166,14 +1161,12 @@ public:
 	LiteralAST(std::shared_ptr<IntLiteralAST> intvalue) :intvalue(std::move(intvalue)) {}
 	LiteralAST(std::shared_ptr<DoubleLiteralAST> doublevalue) :doublevalue(std::move(doublevalue)) {}
 	LiteralAST(std::shared_ptr<StringLiteralAST> stringvalue) :stringvalue(std::move(stringvalue)) {}
-	std::shared_ptr<SimpleExprAST> traitValue()
-	{
-		if (intvalue) return intvalue->traitValue();
-		if (doublevalue) return doublevalue->traitValue();
-		if (stringvalue) return stringvalue->traitValue();
-		return nullptr;
-	}
+	std::shared_ptr<SimpleExprAST>traitValue();
+	
 };
+
+
+
 
 class IntLiteralAST
 {
@@ -1461,6 +1454,9 @@ public:
 		table_name(std::move(table_name)), old_name(std::move(old_name)) {}
 };
 
+// create table tb(x1 int primary key,x2 int,x3 int,primary key(x1)); not allowed for multiple primary key
+// create table tb(x1 int primary key,x2 int,x3 int,primary key(x2)); not allowed for multiple primary key
+// but multiple unique key is OK
 class CreatedefAST
 {
 public:
@@ -1494,13 +1490,13 @@ public:
 	std::shared_ptr<DatatypeAST> dtype;
 	bool null_flag = true;
 	std::shared_ptr<ExprAST> default_value;
-	bool shared_flag = false;
+	bool unic_flag = false;
 	bool primary_flag = false;
 	std::shared_ptr<RefdefAST> refdef;
 	ColdefAST(std::shared_ptr<DatatypeAST> dtype, bool null_flag, std::shared_ptr<ExprAST> default_value,
-		bool shared_flag, bool primary_flag, std::shared_ptr<RefdefAST> refdef) :
+		bool unic_flag, bool primary_flag, std::shared_ptr<RefdefAST> refdef) :
 		dtype(std::move(dtype)), null_flag(null_flag), default_value(std::move(default_value)),
-		shared_flag(shared_flag), primary_flag(primary_flag), refdef(std::move(refdef)) {}
+		unic_flag(unic_flag), primary_flag(primary_flag), refdef(std::move(refdef)) {}
 };
 
 class DatatypeAST

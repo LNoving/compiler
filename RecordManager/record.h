@@ -1,6 +1,3 @@
-//
-// Created by Aoleo on 2018/6/7.
-//
 
 #ifndef RECORDMANAGER_RECORD_H
 #define RECORDMANAGER_RECORD_H
@@ -8,6 +5,11 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <cstring>
+#include <windows.h>
+#include <string>
+#include <exception>
+#include <algorithm>
 #include "page.h"
 #include "dynamic_memory.h"
 #include "datatype.h"

@@ -1,26 +1,12 @@
-//
-// Created by Aoleo on 2018/6/7.
-//
-
 #include "record.h"
-#include "datatype.h"
-#include <iostream>
-#include <cstring>
-#include <windows.h>
-#include <string>
-#include <exception>
-#include <algorithm>
-
-#ifndef _BLOCK_SIZE_
-#define BLOCK_SIZE (4096)
-#endif
 
 #ifndef _EMPTY_FLAG_
 #define EMPTY_FLAG (-1)
 #endif
 
-using namespace std;
-
+using std::vector;
+using std::string;
+/*
 Table::Table(int id, const char* name, vector<Column> &columns) {
     this->id = id;
     this->name = name;
@@ -62,11 +48,7 @@ void Table::deleteRecord(string &attrName, bool (*check) (BaseData*)) {
 
 }
 
-/**
- * @note 确保查询前已经检查了属性名的合法性
- * @param attrName
- * @return
- */
+
 vector<map<string, BaseData*>> Table::queryAll(vector<string> &attrNames) {
     vector<map<string, BaseData*>> results;
     auto list = manager->getRePosAll();
@@ -107,6 +89,7 @@ vector<map<string, BaseData*>> Table::queryAll(vector<string> &attrNames) {
     }
     return results;
 }
+*/
 
 /**
  * 对所有属性进行插入。
@@ -114,6 +97,8 @@ vector<map<string, BaseData*>> Table::queryAll(vector<string> &attrNames) {
  * @param record
  * @return
  */
+
+/*
 int Table::insertRecord(vector<char*> &record) {
     //检查主键以及unique
     auto pos = this->manager->getRePosAll();    //所有记录的首地址
@@ -229,3 +214,5 @@ vector<string> Table::getNullAttr(char* bitMap){
         }
     }
 }
+
+*/
